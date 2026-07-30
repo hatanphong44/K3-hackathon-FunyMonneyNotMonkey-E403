@@ -66,12 +66,14 @@ Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
 - §4b. Nguyên tắc đã áp dụng:
 
 | Nguyên tắc | Áp cụ thể vào đâu trong prototype |
-|---|---|
-| Transparency | Hiển thị nguồn dữ liệu dùng để sinh câu hỏi (slide / transcript) và giải thích đáp án. |
-| Groundedness | Ưu tiên dữ liệu từ slide làm nguồn chính; transcript chỉ dùng để làm rõ và không suy đoán ngoài tài liệu. |
-| Support, don't replace | AI tạo quiz và gợi ý, nhưng không tự kết luận người học đã hiểu bài. |
-| Error Recovery | Người dùng có thể tạo lại quiz, chỉnh sửa câu hỏi hoặc đổi nguồn dữ liệu nếu kết quả chưa phù hợp. |
-| Progressive disclosure | UI chỉ hiện câu hỏi, đáp án và hint ở mức cần thiết để giảm rối và tăng tốc độ làm bài. |
+### §4b. Nguyên tắc đã áp dụng
+
+| Guideline (HAX) | Áp dụng cụ thể vào prototype |
+|-----------------|------------------------------|
+| **G1 — Làm rõ hệ thống làm được gì** | Hệ thống thông báo AI chỉ tạo câu hỏi trắc nghiệm dựa trên nội dung của slide và transcript được tải lên. AI không đánh giá năng lực người học và không sử dụng kiến thức ngoài tài liệu. |
+| **G2 — Làm rõ hệ thống hoạt động tốt đến mức nào** | Khi slide hoặc transcript không đầy đủ, hệ thống cảnh báo rằng chất lượng câu hỏi có thể bị ảnh hưởng hoặc không thể tạo đủ số lượng câu hỏi mong muốn. |
+| **G8 — Gạt bỏ dễ dàng** | Người dùng có thể bỏ qua bộ câu hỏi đã tạo và tạo lại bộ câu hỏi mới nếu cảm thấy nội dung chưa phù hợp. |
+| **G10 — Hỗ trợ người dùng sửa chữa hiệu quả** | Khi phát hiện tài liệu đầu vào có vấn đề hoặc kết quả chưa đạt yêu cầu, người dùng có thể yêu cầu cập nhật slide hoặc transcript rồi yêu cầu AI tạo lại bộ câu hỏi mà không cần thực hiện lại toàn bộ quy trình. |
 
 ## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản
 
