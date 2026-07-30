@@ -36,7 +36,7 @@ python codebase/web/api_server.py
 ### 3. Khởi chạy Streamlit Frontend UI
 Mở một cửa sổ terminal mới và chạy lệnh:
 ```bash
-streamlit run web/app.py
+streamlit run codebase/web/app.py
 ```
 *Giao diện trang web sẽ tự động mở trên trình duyệt tại `http://localhost:8501`.*
 
