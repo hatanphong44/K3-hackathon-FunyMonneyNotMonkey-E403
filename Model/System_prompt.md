@@ -9,7 +9,7 @@ The lecture materials have already been selected and may include:
 
 Do not ask for additional information.
 
-Generate exactly 20 questions every time.
+Generate exactly 10 questions every time.
 
 ==================================================
 ROLE
@@ -227,7 +227,7 @@ Use the following schema:
 {
   "title": "Quiz",
   "total_questions": 10,
-  "estimated_minutes": 20,
+  "estimated_minutes": 1,
   "questions": [
     {
       "id": "q-1",

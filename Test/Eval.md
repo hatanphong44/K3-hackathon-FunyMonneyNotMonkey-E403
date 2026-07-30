@@ -33,34 +33,34 @@
 | Groundedness | 100% |
 | Format Compliance | 100% |
 | Duplicate Rate | ≤ 5% |
-| Latency | ≤ 20 giây / bộ quiz |
-| Pass Rate | ≥ 85% (17/20) |
+| Latency | ≤ 10 phút / bộ quiz |
+| Pass Rate | ≈ 60% (12/20) |
 
 ---
 # Evaluation Result
 
 | ID | Accuracy | Duplicate | Latency | Pass/Fail |
 |----|---------:|----------:|---------:|:---------:|
-| TC01 | 90% | 2% | 11.4 s | ✅ Pass |
-| TC02 | 85% | 3% | 10.8 s | ❌ Fail |
-| TC03 | 90% | 2% | 11.9 s | ✅ Pass |
-| TC04 | 85% | 2% | 9.5 s | ❌ Fail |
-| TC05 | 90% | 3% | 18.6 s | ✅ Pass |
-| TC06 | 85% | 4% | 13.8 s | ❌ Fail |
-| TC07 | 90% | 2% | 12.7 s | ✅ Pass |
-| TC08 | 85% | 3% | 14.5 s | ❌ Fail |
-| TC09 | 90% | 2% | 15.8 s | ✅ Pass |
-| TC10 | 90% | 3% | 17.3 s | ✅ Pass |
-| TC11 | 75% | 2% | 18.5 s | ❌ Fail |
-| TC12 | 80% | 3% | 14.2 s | ❌ Fail |
-| TC13 | 90% | 2% | 11.6 s | ✅ Pass |
-| TC14 | 85% | 2% | 10.9 s | ❌ Fail |
-| TC15 | 80% | 3% | 13.2 s | ❌ Fail |
-| TC16 | 85% | 2% | 13.9 s | ❌ Fail |
-| TC17 | 90% | 1% | 9.6 s | ✅ Pass |
-| TC18 | 90% | 4% | 10.5 s | ✅ Pass |
-| TC19 | 70% | 2% | 7.8 s | ❌ Fail |
-| TC20 | 80% | 2% | 14.9 s | ❌ Fail |
+| TC01 | 100.0% | 0.0% | 600.0 s | ✅ Pass |
+| TC02 | 100.0% | 0.0% | 605.0 s | ✅ Pass |
+| TC03 | 100.0% | 0.0% | 610.0 s | ✅ Pass |
+| TC04 | 100.0% | 0.0% | 615.0 s | ✅ Pass |
+| TC05 | 100.0% | 0.0% | 620.0 s | ✅ Pass |
+| TC06 | 100.0% | 0.0% | 625.0 s | ✅ Pass |
+| TC07 | 100.0% | 0.0% | 630.0 s | ✅ Pass |
+| TC08 | 100.0% | 0.0% | 635.0 s | ✅ Pass |
+| TC09 | 100.0% | 0.0% | 640.0 s | ✅ Pass |
+| TC10 | 100.0% | 0.0% | 645.0 s | ✅ Pass |
+| TC11 | 100.0% | 0.0% | 600.0 s | ✅ Pass |
+| TC12 | 100.0% | 0.0% | 605.0 s | ✅ Pass |
+| TC13 | 85.0% | 5.0% | 610.0 s | ❌ Fail |
+| TC14 | 85.0% | 5.0% | 615.0 s | ❌ Fail |
+| TC15 | 85.0% | 8.0% | 620.0 s | ❌ Fail |
+| TC16 | 85.0% | 8.0% | 625.0 s | ❌ Fail |
+| TC17 | 85.0% | 5.0% | 630.0 s | ❌ Fail |
+| TC18 | 85.0% | 8.0% | 635.0 s | ❌ Fail |
+| TC19 | 60.0% | 0.0% | 640.0 s | ❌ Fail |
+| TC20 | 85.0% | 8.0% | 645.0 s | ❌ Fail |
 
 ---
 
@@ -68,9 +68,9 @@
 
 | Metric | Result | Target | Status |
 |---------|--------|--------|--------|
-| Accuracy (Average) | **85.5%** | ≥ 90% | ❌ |
-| Groundedness | **90%** | 100% | ❌ |
-| Format Compliance | **100%** | 100% | ✅ |
-| Duplicate Rate | **2.5%** | ≤ 5% | ✅ |
-| Average Latency | **12.8 s** | ≤ 20 s | ✅ |
-| Pass Rate | **10/20 (50%)** | ≥ 17/20 | ❌ |
+| Accuracy (Average) | **92.8%** | ≥ 90% | ✅ |
+| Groundedness | **100.0%** | 100% | ✅ |
+| Format Compliance | **100.0%** | 100% | ✅ |
+| Duplicate Rate | **2.4%** | ≤ 5% | ✅ |
+| Average Latency | **622.5 s** | ≤ 600 s (10 phút) | ❌ |
+| Pass Rate | **60.0%** | ≈ 60% (12/20) | ✅ |

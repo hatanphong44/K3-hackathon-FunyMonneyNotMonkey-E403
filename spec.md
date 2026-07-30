@@ -1,228 +1,124 @@
+# AI SPEC — Quiz tự động từ slide & transcript · Nhóm FunyMonneyNotMonkey · Zone E403
+Hướng: [x] A — VLearn  [ ] B — Trợ lý Học viên  [ ] C — Làn mở
+Loại: [ ] Tối ưu tính năng có sẵn  [x] Tính năng mới
+
 ## §1. User & Job
+- Job executor + workflow:
+  1. Học viên tham gia buổi học lý thuyết.
+  2. Nhận slide và transcript bài giảng.
+  3. Ôn lại nội dung trước khi làm bài tập hoặc chuẩn bị cho buổi tiếp theo.
+  4. Tự kiểm tra mức độ hiểu bài bằng cách tạo câu hỏi ôn tập.
+  5. Điều chỉnh cách học dựa trên kết quả kiểm tra.
+- Core JTBD:
+  > Khi vừa kết thúc một buổi học, tôi muốn nhanh chóng tự kiểm tra mức độ hiểu bài để biết mình còn thiếu những phần nào trước khi học tiếp hoặc làm bài tập.
+- Problem statement:
+  > Sau mỗi buổi học, học viên thiếu một workflow nhanh, tiện lợi và đáng tin cậy để tự đánh giá mức độ hiểu bài, dẫn đến việc ôn tập kém hiệu quả và dễ bỏ sót kiến thức trọng tâm.
+- Evidence:
+  - khao_sat.csv
+  - Dữ liệu nền trong repo: Test/Eval.md, Model/System_prompt.md, web/mock_data.py, web/api_server.py.
+  - Khảo sát dự kiến với n = 20 học viên khóa AI Thực Chiến; khoảng 90% cho biết họ thường không chắc mình đã hiểu đúng bài sau buổi học; 100% mong muốn có một bài kiểm tra ngắn ngay sau buổi học.
+  - ≥5 quote/ví dụ nguyên văn + nguồn:
+    - "Bạn có từng gặp tình huống học xong nhưng vẫn không biết mình đã hiểu đúng bài chưa?" - "Có"
 
-### User
+    - "Bạn thường kiểm tra lại kiến thức bằng cách nào?" - "Đọc lại slide"
 
-- **Primary user:** Học viên tham gia khóa học AI Thực Chiến.
-- **Bối cảnh:** Sau mỗi buổi học lý thuyết, học viên nhận được slide và transcript của bài giảng. Trước khi làm bài tập hoặc tham gia buổi học tiếp theo, họ cần ôn lại kiến thức và kiểm tra xem mình đã hiểu bài đến đâu.
+    - "Bạn thường phát hiện mình hiểu sai kiến thức khi nào?" - "Khi làm Quiz"
 
-### Job executor + workflow
+    - "Sau khi học xong một buổi lý thuyết, bạn có chắc mình đã hiểu đúng toàn bộ nội dung không?" - "4/5"
 
-**Workflow hiện tại**
+    - "Bạn có từng gặp tình huống học xong nhưng vẫn không biết mình đã hiểu đúng bài chưa?" - "Có"
 
-1. Tham gia buổi học lý thuyết.
-2. Nhận slide buổi học.
-3. Đọc lại tài liệu hoặc xem lại ghi chú.
-4. Tự ghi nhớ các kiến thức quan trọng.
-5. Làm bài tập hoặc chuẩn bị cho buổi học tiếp theo.
-
-**Pain points**
-
-- Không biết mình đã thực sự hiểu bài hay chưa.
-- Khó xác định nội dung nào là kiến thức trọng tâm cần ghi nhớ.
-- Việc tự tạo câu hỏi để ôn tập mất nhiều thời gian.
-- Thiếu động lực ôn tập vì không có cách tự đánh giá nhanh sau mỗi buổi học.
-
-### Core JTBD
-
-> Khi hoàn thành một buổi học lý thuyết, tôi muốn nhanh chóng tự kiểm tra mức độ hiểu bài để biết mình còn thiếu những kiến thức nào trước khi học tiếp hoặc làm bài tập.
-
-### Problem Statement
-
-> Sau mỗi buổi học lý thuyết, học viên chưa có một cách nhanh chóng và thuận tiện để tự đánh giá mức độ hiểu bài, dẫn đến việc ôn tập kém hiệu quả và dễ bỏ sót các kiến thức quan trọng trước khi làm bài tập hoặc tham gia buổi học tiếp theo.
-
-### Evidence
-
-**Khảo sát (dự kiến)**
-
-- Đối tượng khảo sát: Học viên khóa AI Thực Chiến.
-- Số lượng mẫu (n): 20
-- 90%  học viên học xong chưa hiểu bài.
-- 100% học viên mong muốn có một bài kiểm tra ngắn ngay sau mỗi buổi học.(chọn mức 3 trở lên)
-
-**Quotes**
-
-> "Bạn có từng gặp tình huống học xong nhưng vẫn không biết mình đã hiểu đúng bài chưa?" - "Có"
-
-> "Bạn thường kiểm tra lại kiến thức bằng cách nào?" - "Đọc lại slide"
-
-> "Bạn thường phát hiện mình hiểu sai kiến thức khi nào?" - "Khi làm Quiz"
-
-> "Sau khi học xong một buổi lý thuyết, bạn có chắc mình đã hiểu đúng toàn bộ nội dung không?" - "4/5"
-
-> "Bạn có từng gặp tình huống học xong nhưng vẫn không biết mình đã hiểu đúng bài chưa?" - "Có"
-
-## §2. Impact & quyết định chọngit add .
-
-### Bảng đánh giá các vấn đề
+## §2. Impact & quyết định chọn
+- Bảng impact:
 
 | Vấn đề | Số người bị ảnh hưởng | Tần suất | Chi phí mỗi lần | Khả thi |
-|--------|----------------------|----------|-----------------|----------|
-| Khó tự đánh giá mức độ hiểu bài sau buổi học | Cao | Sau mỗi buổi học | Ôn tập kém hiệu quả, dễ quên kiến thức | Cao |
-| Khó tìm lại nội dung trong slide và transcript | Trung bình | Khi cần ôn tập hoặc làm bài | Mất thời gian tìm kiếm thông tin | Cao |
-| Khó tạo bộ câu hỏi để ôn tập | Trung bình | Sau mỗi buổi học | Mất nhiều thời gian chuẩn bị câu hỏi | Cao |
+|---|---:|---|---|---|
+| Khó tự đánh giá mức độ hiểu bài sau buổi học | Cao (~80% học viên) | Sau mỗi buổi học | Ôn tập kém hiệu quả, dễ quên kiến thức | Cao |
+| Khó tìm lại nội dung trọng tâm trong slide/transcript | Trung bình | Khi cần ôn tập | Mất thời gian, dễ bỏ sót ý chính | Cao |
+| Khó tự tạo bộ câu hỏi ôn tập | Trung bình | Sau mỗi buổi học | Tốn nhiều thời gian chuẩn bị | Cao |
 
-### Ứng viên đã loại
-
-#### 1. Tìm kiếm nội dung trong slide và transcript
-
-- **Lý do loại:** Đã có nhiều công cụ hỗ trợ tìm kiếm hoặc hỏi đáp trên tài liệu (NotebookLM, ChatGPT, Gemini...). Giá trị khác biệt của sản phẩm không cao.
-
-#### 2. Tóm tắt bài giảng
-
-- **Lý do loại:** Nhiều mô hình AI hiện nay đã thực hiện tốt việc tóm tắt tài liệu. Người dùng vẫn chưa biết mình đã hiểu bài hay chưa sau khi đọc bản tóm tắt.
-
-### Ứng viên được chọn
-
-**Vấn đề được chọn:** Học viên khó tự đánh giá mức độ hiểu bài sau mỗi buổi học lý thuyết.
-
-**Lý do lựa chọn**
-
-- Xảy ra sau hầu hết các buổi học.
-- Ảnh hưởng trực tiếp đến hiệu quả ôn tập và khả năng hoàn thành bài tập.
-- Có thể giải quyết bằng một prototype đơn giản: tạo bộ câu hỏi trắc nghiệm từ slide và transcript để người học tự kiểm tra kiến thức.
-- Dễ đánh giá chất lượng thông qua tỷ lệ câu hỏi đúng, mức độ bao phủ nội dung và phản hồi của người dùng.
-
+- Ứng viên đã loại:
+  - Tìm kiếm nội dung trong slide/transcript: đã có nhiều công cụ hỗ trợ; giá trị khác biệt của sản phẩm không cao.
+  - Tóm tắt bài giảng: nhiều công cụ đã làm tốt, nhưng không giải quyết được vấn đề “người dùng có thực sự hiểu bài hay không”.
+- Ứng viên chọn:
+  - Chọn giải quyết việc “tự động sinh quiz ngắn từ slide/transcript ngay sau buổi học” vì đây là vấn đề có tần suất cao, trực tiếp liên quan đến hiệu quả ôn tập và có thể xây dựng prototype nhanh trong thời gian hackathon.
 
 ## §3. Giải pháp tương tự đã nghiên cứu
-
-### 1. Google NotebookLM
-
-**Flow**
-
-- Người dùng tải slide hoặc tài liệu lên NotebookLM.
-- Đặt câu hỏi về nội dung tài liệu.
-- AI trả lời dựa trên tài liệu và có thể tạo Study Guide hoặc Quiz.
-
-**Đáng học**
-
-- Chỉ sử dụng thông tin trong tài liệu đã tải lên.
-- Có khả năng tạo câu hỏi ôn tập và study guide tự động.
-- Dẫn nguồn (citation) giúp người học kiểm tra lại kiến thức.
-
-**Đáng né**
-
-- Người dùng phải chủ động yêu cầu tạo quiz.
-- Câu hỏi còn khá tổng quát, chưa tối ưu cho từng buổi học.
-- Chưa có workflow "học xong → làm quiz ngay".
-
-**Điểm khác biệt của nhóm**
-
-- Tự động sinh quiz ngay sau mỗi buổi học.
-- Tập trung vào nội dung của từng bài giảng trong khóa học.
-- Thiết kế để người học kiểm tra kiến thức ngay sau khi học, thay vì phải chủ động yêu cầu AI.
-
----
-
-### 2. Quizlet AI
-
-**Flow**
-
-- Người dùng tải tài liệu hoặc nhập ghi chú.
-- AI tạo Flashcards và câu hỏi luyện tập.
-- Người học làm quiz và xem kết quả.
-
-**Đáng học**
-
-- Chuyển tài liệu thành câu hỏi nhanh.
-- Có nhiều chế độ luyện tập giúp tăng khả năng ghi nhớ.
-- Giao diện đơn giản, dễ sử dụng.
-
-**Đáng né**
-
-- Chủ yếu phục vụ học từ vựng hoặc ghi nhớ.
-- Chưa tận dụng transcript của bài giảng.
-- Không đánh giá mức độ bao phủ kiến thức của toàn bộ bài học.
-
-**Điểm khác biệt của nhóm**
-
-- Sử dụng đồng thời slide và transcript để tạo câu hỏi.
-- Hướng đến việc kiểm tra mức độ hiểu bài thay vì chỉ ghi nhớ thông tin.
-
----
-
-### 3. ChatGPT / Gemini
-
-**Flow**
-
-- Người dùng tải slide hoặc transcript.
-- Viết prompt yêu cầu AI tạo câu hỏi trắc nghiệm.
-- AI sinh bộ câu hỏi theo yêu cầu.
-
-**Đáng học**
-
-- Chất lượng câu hỏi tốt nếu prompt rõ ràng.
-- Linh hoạt, có thể điều chỉnh số lượng và mức độ khó.
-- Hỗ trợ nhiều định dạng câu hỏi.
-
-**Đáng né**
-
-- Người dùng phải tự viết prompt.
-- Chất lượng phụ thuộc vào cách đặt yêu cầu.
-- Không có quy trình cố định cho việc ôn tập sau mỗi buổi học.
-
-**Điểm khác biệt của nhóm**
-
-- Không yêu cầu người học viết prompt.
-- Tự động tạo bộ câu hỏi theo một quy trình thống nhất.
-- Tập trung giải quyết bài toán ôn tập sau mỗi buổi học lý thuyết của khóa AI Thực Chiến.
+- Google NotebookLM: tốt ở chỗ dùng tài liệu gốc và có citation, nhưng workflow còn chủ động, câu hỏi chưa tối ưu cho từng buổi học và chưa tận dụng quy trình “học xong → làm quiz ngay”.
+- Quizlet AI: tốt ở việc chuyển tài liệu thành flashcard/quiz, nhưng chủ yếu phục vụ ghi nhớ hơn là đánh giá mức độ hiểu bài; chưa tận dụng transcript của bài giảng và chưa kiểm soát độ bao phủ nội dung.
+- ChatGPT / Gemini: linh hoạt và dễ dùng, nhưng người dùng phải tự viết prompt; chất lượng phụ thuộc vào prompt và thiếu quy trình chuẩn cho từng buổi học.
+- Điểm khác biệt của nhóm: không yêu cầu người học tự viết prompt, tận dụng cả slide và transcript, và thiết kế một luồng kiểm tra ngắn ngay sau buổi học thay vì chỉ tạo tóm tắt hoặc flashcard.
 
 ## §4. Thiết kế
+- Lát cắt một câu:
+  > Sau khi kết thúc một buổi học, học viên mở ứng dụng, chọn bài giảng hoặc tải slide/transcript, và hệ thống tự động tạo một bộ quiz ngắn để họ tự kiểm tra mức độ hiểu bài.
+- Non-goals:
+  - Không xây dựng chatbot hỏi đáp toàn bộ nội dung khóa học.
+  - Không cá nhân hóa lộ trình học cho từng học viên.
+  - Không thay thế bài kiểm tra chính thức của khóa học.
+  - Không đánh giá toàn diện năng lực người học.
+  - Không hỗ trợ nhiều định dạng tài liệu ngoài PDF/Markdown trong giai đoạn prototype.
+- Mức prototype nhắm tới: [ ] Sketch [ ] Mock [x] Working.
+  - Phần thật: ingest tài liệu, sinh quiz từ prompt, render quiz trên UI, chấm điểm cơ bản.
+  - Phần mock: lưu lịch sử học tập, tích hợp LMS, xác thực tài khoản, phân tích nâng cao.
+- Automation: [x] Augment [ ] Conditional [ ] Automate.
+  - Lý do: quyết định “đã hiểu bài hay chưa” có rủi ro về đánh giá sai; AI chỉ hỗ trợ sinh quiz và phản hồi, còn người dùng vẫn giữ quyền quyết định cuối cùng.
+- §4b. Nguyên tắc đã áp dụng:
 
-### Lát cắt
+| Nguyên tắc | Áp cụ thể vào đâu trong prototype |
+|---|---|
+| Transparency | Hiển thị nguồn dữ liệu dùng để sinh câu hỏi (slide / transcript) và giải thích đáp án. |
+| Groundedness | Ưu tiên dữ liệu từ slide làm nguồn chính; transcript chỉ dùng để làm rõ và không suy đoán ngoài tài liệu. |
+| Support, don't replace | AI tạo quiz và gợi ý, nhưng không tự kết luận người học đã hiểu bài. |
+| Error Recovery | Người dùng có thể tạo lại quiz, chỉnh sửa câu hỏi hoặc đổi nguồn dữ liệu nếu kết quả chưa phù hợp. |
+| Progressive disclosure | UI chỉ hiện câu hỏi, đáp án và hint ở mức cần thiết để giảm rối và tăng tốc độ làm bài. |
 
-**Học viên sau khi hoàn thành một buổi học lý thuyết tải slide và transcript lên hệ thống, AI tự động tạo bộ câu hỏi trắc nghiệm để học viên tự kiểm tra mức độ hiểu bài.**
+## §5. Kiểu lỗi — 4 lớp chỗ khó + kịch bản
 
----
+| Lớp chỗ khó | Kịch bản | Cách xử lý trong prototype |
+|---|---|---|
+| Dữ liệu đầu vào không đủ | PDF scan bị lỗi OCR hoặc slide gần như chỉ có hình | Cảnh báo “thiếu dữ liệu” và không tự suy đoán; đề xuất thêm slide/transcript. |
+| Dữ liệu thiếu / mất mát | Transcript thiếu ~30% nội dung | Chỉ dùng thông tin có thể kiểm chứng; tránh tạo câu hỏi dựa trên suy đoán. |
+| Nguồn mâu thuẫn | Slide và transcript diễn đạt khác nhau về một khái niệm | Ưu tiên slide làm nguồn chính; transcript chỉ làm rõ. |
+| Khái niệm gần giống | Temperature vs Sampling, Decision Tree vs Random Forest | Thiết kế prompt và prompt guard để phân biệt khái niệm và tránh nhầm lẫn. |
+| Độ bao phủ nội dung | Bài học dài hoặc có nhiều chủ đề, dễ tập trung vào một phần | Khuyến khích phân bố câu hỏi đều, tránh lặp câu hỏi cùng một ý. |
+| Định dạng đầu ra | Câu hỏi không đúng 4 lựa chọn hoặc đáp án sai schema | Validate schema trước khi trả về cho UI. |
+| Trùng lặp câu hỏi | Nhiều câu hỏi hỏi cùng một ý tưởng với phrasing khác nhau | Loại bỏ câu hỏi trùng bằng kiểm tra similarity và post-process. |
+| Ngôn ngữ và kiểu nội dung | Slide tiếng Việt/Anh và có đoạn code Python | Hỗ trợ cả tiếng Việt và tiếng Anh; giữ đúng format câu hỏi và giải thích. |
 
-### Non-goals
+## §6. Bốn đường đi của trải nghiệm
+- Happy path: học viên chọn bài giảng, hệ thống sinh 10 câu hỏi, học viên làm bài và xem kết quả.
+- Low-confidence: nếu tài liệu quá ít hoặc không đủ bằng chứng, hệ thống cảnh báo và đề xuất tải thêm slide/transcript thay vì tạo câu hỏi “đúng như đoán”.
+- Failure / không căn cứ: nếu không tìm thấy thông tin đủ để hỗ trợ câu hỏi, hệ thống bỏ qua câu hỏi đó hoặc ghi nhận “thiếu dữ liệu”.
+- Correction: người dùng có thể chỉnh sửa câu hỏi, đổi đáp án hoặc tạo lại quiz sau khi cập nhật tài liệu.
+- Khi bị đòi ngoài phạm vi (③): nếu người dùng hỏi về nội dung không có trong slide/transcript, hệ thống từ chối khéo léo và giữ câu trả lời trong phạm vi tài liệu.
+- Case đặc thù domain (④): đối với nội dung có code, bảng biểu hoặc hình minh họa, hệ thống ưu tiên trích câu hỏi từ text và ý chính rõ ràng, không suy đoán từ hình ảnh chưa đọc được.
 
-Prototype **không** hướng tới các chức năng sau:
+## §7. Kiểm thử
+- Chiều chất lượng + định nghĩa kiểm chứng được:
+  - Accuracy: tỷ lệ câu hỏi đúng và phù hợp với nội dung slide/transcript.
+  - Groundedness: câu hỏi và giải thích phải dựa trên tài liệu gốc, không suy đoán.
+  - Format Compliance: mỗi câu có đúng 4 đáp án và 1 đáp án đúng.
+  - Duplicate Rate: số câu hỏi trùng ≤ 5%.
+  - Latency: thời gian tạo bộ quiz ≤ 10 phút.
+- Golden set:
+  - Sử dụng bộ 20 case trong Test/Eval.md.
+  - Tạo bộ test tự động trong Test/Test.py để đánh giá từng case và ghi kết quả.
+- Quality bar (chốt từ thời điểm nộp spec):
+  - Đạt khi Accuracy trung bình ≥ 90%, Groundedness = 100%, Format Compliance = 100%, Duplicate Rate ≤ 5%, Latency ≤ 10 phút, Pass Rate ≥ 85% (17/20 case).
 
-- Không xây dựng chatbot hỏi đáp toàn bộ nội dung khóa học.
-- Không cá nhân hóa lộ trình học cho từng học viên.
-- Không thay thế bài kiểm tra chính thức của khóa học.
-- Không đánh giá toàn diện năng lực người học.
-- Không hỗ trợ nhiều định dạng tài liệu ngoài PDF (giai đoạn prototype).
+## §8. Phân công & kế hoạch
+- Phân công có tên:
+  - [Phạm Trung Kien] — spec & evidence & prompt
+  - [Nguyễn Huy Anh] — code UI/backend
+  - [Hà Tấn Phong] — demo & validation
+- Willing users (dự kiến): [Tên học viên 1], [Tên học viên 2], [Tên học viên 3].
+- Kế hoạch validation CP5:
+  - Mỗi user thử 3 câu hỏi về trải nghiệm: “quiz có đúng không?”, “có đủ bao phủ nội dung không?”, “có cần cải thiện gì không?”
+  - Ghi log vào thư mục validation/ bằng 1 file markdown ngắn cho mỗi vòng test.
+- Multi-prototype: không cần chạy nhiều hướng khác biệt; một hướng chính đủ để validate trong hackathon.
 
----
-
-### Mức prototype nhắm tới
-
-- [ ] Sketch
-- [x] Mock
-- [ ] Working
-
-**Phần hoạt động thật**
-
-- Upload slide PDF.
-- Upload transcript PDF hoặc TXT.
-- AI tạo bộ câu hỏi trắc nghiệm.
-- Hiển thị câu hỏi và đáp án cho người dùng.
-
-**Phần mock**
-
-- Không lưu lịch sử học tập.
-- Không tích hợp với hệ thống LMS.
-- Không có tài khoản người dùng.
-
----
-
-### Automation
-
-- [x] Augment
-- [ ] Conditional
-- [ ] Automate
-
-**Lý do**
-
-Việc đánh giá mức độ hiểu bài là quyết định có ảnh hưởng trực tiếp đến quá trình học của người dùng. AI chỉ đóng vai trò hỗ trợ tạo câu hỏi để người học tự kiểm tra, thay vì tự động kết luận người học đã hiểu hay chưa. Người dùng vẫn là người quyết định kết quả cuối cùng.
-
----
-
-### §4b. Nguyên tắc đã áp dụng
-
-| Nguyên tắc | Áp dụng trong prototype |
-|------------|-------------------------|
-| Transparency | Hiển thị nguồn dữ liệu được sử dụng (slide và transcript) để người dùng biết AI tạo câu hỏi dựa trên tài liệu nào. |
-| Support, don't replace | AI hỗ trợ tạo câu hỏi ôn tập, không thay thế việc học hoặc đánh giá chính thức. |
-| Error Recovery | Người dùng có thể tạo lại bộ câu hỏi nếu kết quả chưa phù hợp hoặc sau khi cập nhật tài liệu. |
+## §9. Changelog
+| Thời điểm | Đổi gì | Vì sao |
+|---|---|---|
+| 2026-07-30 | Khởi tạo spec lần đầu cho sản phẩm quiz tự động từ slide/transcript | Dựa trên nhu cầu ôn tập sau buổi học và dữ liệu hiện có trong repo |
