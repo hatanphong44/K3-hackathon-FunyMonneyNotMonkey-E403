@@ -51,7 +51,7 @@
 
 > "Bạn có từng gặp tình huống học xong nhưng vẫn không biết mình đã hiểu đúng bài chưa?" - "Có"
 
-## §2. Impact & quyết định chọn
+## §2. Impact & quyết định chọngit add .
 
 ### Bảng đánh giá các vấn đề
 
