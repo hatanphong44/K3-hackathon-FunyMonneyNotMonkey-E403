@@ -154,7 +154,7 @@ def generate_quiz(case: EvalCase) -> dict[str, Any]:
     if os.getenv("OPENROUTER_API_KEY"):
         sys.path.insert(0, str(PROJECT_ROOT))
         try:
-            from Model.Provider import OpenRouterProvider  # type: ignore
+            from codebase.Model.Provider import OpenRouterProvider  # type: ignore
 
             provider = OpenRouterProvider(api_key=os.getenv("OPENROUTER_API_KEY"))
             return provider.generate_quiz(num_questions=case.expected_questions, difficulty="Trung bình", data_dir=PROJECT_ROOT / "Data_Import")

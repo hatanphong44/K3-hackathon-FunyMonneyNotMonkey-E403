@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sys.path.insert(0, PROJECT_ROOT)
 
-from mock_data import SAMPLE_LECTURES, generate_quiz_from_content
+from web.mock_data import SAMPLE_LECTURES, generate_quiz_from_content
 
 app = FastAPI(
     title="VLearn AI Quiz Generator API",
@@ -262,5 +262,5 @@ def export_quiz(req: ExportQuizRequest):
 
 if __name__ == "__main__":
     import uvicorn
-    from config import API_HOST, API_PORT
+    from web.config import API_HOST, API_PORT
     uvicorn.run(app, host=API_HOST, port=API_PORT)

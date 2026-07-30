@@ -4,20 +4,26 @@ Enhanced version with Instructor Edit Mode, Student Quiz Selection, Unanswered Q
 Role Protection, and Student/Instructor Knowledge Gap Dashboards.
 """
 
-import sys
 import os
 import streamlit as st
 import requests
 import json
 from typing import Dict, Any, List, Callable
+from pathlib import Path
+import sys
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-sys.path.insert(0, PROJECT_ROOT)
 
-from config import APP_TITLE, APP_SUBTITLE, API_BASE_URL
-from mock_data import SAMPLE_LECTURES, generate_quiz_from_content
-from ui_components import render_header, inject_custom_css, render_metric_box
+
+CODEBASE_ROOT = Path(__file__).resolve().parents[1]   # Day05-GroupAI/codebase
+PROJECT_ROOT = Path(__file__).resolve().parents[2]    # Day05-GroupAI
+
+sys.path.insert(0, str(CODEBASE_ROOT))
+
+
+from web.config import APP_TITLE, APP_SUBTITLE, API_BASE_URL
+from web.mock_data import SAMPLE_LECTURES, generate_quiz_from_content
+from web.ui_components import render_header, inject_custom_css, render_metric_box
 
 # Streamlit Page Config
 st.set_page_config(

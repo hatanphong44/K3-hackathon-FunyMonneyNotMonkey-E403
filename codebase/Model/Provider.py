@@ -23,7 +23,7 @@ except ImportError:
     PdfReader = None
 
 
-PROJECT_ROOT = Path(__file__).resolve().parent.parent
+PROJECT_ROOT = Path(__file__).resolve().parent.parent.parent
 DEFAULT_DATA_DIR = PROJECT_ROOT / "Data_Import"
 SYSTEM_PROMPT_PATH = Path(__file__).resolve().parent / "System_prompt.md"
 MAX_SOURCE_CHARS = 100_000
