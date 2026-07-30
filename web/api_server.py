@@ -11,6 +11,8 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
 from mock_data import SAMPLE_LECTURES, generate_quiz_from_content
 
@@ -37,6 +39,12 @@ class GenerateQuizRequest(BaseModel):
     num_questions: int = Field(5, ge=1, le=15, description="Số lượng câu hỏi cần tạo")
     difficulty: str = Field("Trung bình", description="Độ khó: Dễ, Trung bình, Nâng cao")
     question_types: List[str] = Field(["multiple_choice", "true_false"], description="Các dạng câu hỏi")
+
+
+class GenerateStudentQuizRequest(BaseModel):
+    """Yêu cầu sinh một đề mới từ toàn bộ tài liệu trong Data_Import."""
+
+    difficulty: str = Field("Trung bình", description="Độ khó: Dễ, Trung bình, Nâng cao")
 
 
 class StudentAnswersRequest(BaseModel):
@@ -103,6 +111,23 @@ def generate_quiz(req: GenerateQuizRequest):
         "status": "success",
         "quiz": quiz
     }
+
+
+@app.post("/api/v1/generate-student-quiz")
+def generate_student_quiz(req: GenerateStudentQuizRequest):
+    """Tạo một đề mới bằng OpenRouter provider trong Model/Provider.py.
+
+    Frontend lưu kết quả trong session, vì vậy endpoint này chỉ được gọi lần đầu hoặc khi sinh viên chủ động yêu cầu tạo lại đề.
+    """
+    try:
+        from Model.Provider import OpenRouterProvider
+
+        provider = OpenRouterProvider()
+        quiz = provider.generate_quiz(num_questions=20, difficulty=req.difficulty)
+    except Exception as exc:
+        raise HTTPException(status_code=503, detail=f"Không thể tạo đề từ AI provider: {exc}") from exc
+
+    return {"status": "success", "quiz": quiz}
 
 
 @app.post("/api/v1/evaluate-quiz")

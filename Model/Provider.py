@@ -8,7 +8,7 @@ import json
 import os
 import re
 from pathlib import Path
-from typing import Any
+from typing import Any, Callable
 
 from openai import OpenAI
 
@@ -36,7 +36,7 @@ class OpenRouterProvider:
     def __init__(
         self,
         api_key: str | None = None,
-        model: str = "openai/gpt-4o-mini",
+        model: str = "openrouter/free",
     ) -> None:
         if load_dotenv:
             load_dotenv(PROJECT_ROOT / ".env")
@@ -122,19 +122,43 @@ class OpenRouterProvider:
         num_questions: int = 20,
         difficulty: str = "Trung bình",
         data_dir: str | Path = DEFAULT_DATA_DIR,
+        progress_callback: Callable[[str], None] | None = None,
     ) -> dict[str, Any]:
         """Tạo quiz từ các file .md/.pdf và trả về JSON theo format hiện tại."""
         if num_questions != 20:
             raise ValueError("System_prompt.md yêu cầu tạo chính xác 20 câu hỏi.")
 
+        if progress_callback:
+            try:
+                progress_callback("Loading data files from Data_Import...")
+            except Exception:
+                pass
+
         content, source_files = self.load_data_import(data_dir)
+        if progress_callback:
+            try:
+                progress_callback(f"Loaded {len(source_files)} source file(s): {', '.join(source_files) if source_files else 'none'}")
+            except Exception:
+                pass
         system_prompt = self._load_system_prompt()
+        if progress_callback:
+            try:
+                progress_callback("Building prompt for model...")
+            except Exception:
+                pass
+
         prompt = f"""Generate the quiz using the system instructions. The requested difficulty is '{difficulty}'.
 
-The materials below include both lecture slides and lecture transcripts. Their labels are intentional: slides are the primary source; transcripts may only clarify the slides. Return only the JSON format defined in the system prompt.
+    The materials below include both lecture slides and lecture transcripts. Their labels are intentional: slides are the primary source; transcripts may only clarify the slides. Return only the JSON format defined in the system prompt.
 
-LECTURE MATERIALS:
-{content}"""
+    LECTURE MATERIALS:
+    {content}"""
+
+        if progress_callback:
+            try:
+                progress_callback(f"Calling model API ({self.model})...")
+            except Exception:
+                pass
 
         response = self.client.chat.completions.create(
             model=self.model,
@@ -148,6 +172,12 @@ LECTURE MATERIALS:
             max_tokens=MAX_OUTPUT_TOKENS,
             response_format={"type": "json_object"},
         )
+        if progress_callback:
+            try:
+                progress_callback("Model returned response, parsing JSON...")
+            except Exception:
+                pass
+
         response_text = response.choices[0].message.content or ""
         quiz = self._parse_json(response_text)
         # Giữ tương thích với UI hiện tại: system prompt chỉ sinh multiple choice,

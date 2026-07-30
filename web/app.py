@@ -9,9 +9,11 @@ import os
 import streamlit as st
 import requests
 import json
-from typing import Dict, Any, List
+from typing import Dict, Any, List, Callable
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, PROJECT_ROOT)
 
 from config import APP_TITLE, APP_SUBTITLE, API_BASE_URL
 from mock_data import SAMPLE_LECTURES, generate_quiz_from_content
@@ -69,6 +71,47 @@ class APIClient:
             difficulty=payload.get("difficulty", "Trung bình"),
             question_types=payload.get("question_types", ["multiple_choice", "true_false"])
         )
+
+    def generate_student_quiz(self, difficulty: str = "Trung bình", data_dir: str | None = None, progress_callback: Callable[[str], None] | None = None) -> Dict[str, Any]:
+        """Get a fresh 20-question quiz from Model/Provider.py via FastAPI.
+
+        If FastAPI is not running, the same provider is invoked locally. There
+        is deliberately no mock-data fallback for this student flow.
+        """
+        backend_error = ""
+        try:
+            payload = {"difficulty": difficulty}
+            if data_dir:
+                payload["data_dir"] = str(data_dir)
+            if progress_callback:
+                try:
+                    progress_callback("Dispatching request to FastAPI backend...")
+                except Exception:
+                    pass
+            response = requests.post(
+                f"{self.base_url}/generate-student-quiz",
+                json=payload,
+                timeout=10.0,
+            )
+            if response.status_code == 200:
+                quiz = response.json().get("quiz")
+                if quiz and quiz.get("questions"):
+                    return quiz
+            try:
+                backend_error = response.json().get("detail", "Lỗi không xác định")
+            except ValueError:
+                backend_error = f"HTTP {response.status_code}"
+        except requests.RequestException as exc:
+            backend_error = "Không kết nối được FastAPI backend"
+
+            try:
+                from Model.Provider import OpenRouterProvider
+
+                return OpenRouterProvider().generate_quiz(num_questions=20, difficulty=difficulty, data_dir=data_dir or None, progress_callback=progress_callback)
+            except Exception as exc:
+                raise RuntimeError(
+                    f"{backend_error}. Provider cục bộ cũng không thể tạo đề: {exc}"
+                ) from exc
 
     def evaluate_quiz(self, payload: Dict[str, Any]) -> Dict[str, Any]:
         try:
@@ -177,6 +220,12 @@ if "is_instructor_authenticated" not in st.session_state:
 
 if "shuffle_version" not in st.session_state:
     st.session_state.shuffle_version = 0
+
+if "active_student_quiz" not in st.session_state:
+    st.session_state.active_student_quiz = None
+
+if "student_quiz_version" not in st.session_state:
+    st.session_state.student_quiz_version = 0
 
 # Sidebar Navigation
 st.sidebar.image("https://img.icons8.com/isometric-folders/100/brain.png", width=64)
@@ -467,44 +516,90 @@ if mode == "👨‍🏫 Giảng viên: Tạo & Tinh Chỉnh Quiz":
 # ==========================================
 elif mode == "🎓 Sinh viên: Làm Bài Kiểm Tra":
     st.subheader("🎓 Trải Nghiệm Kiểm Tra Kiến Thức Cuối Buổi Học dành cho Sinh Viên")
-    
-    # Lecture / Session Quiz Selection for Students
-    st.markdown("#### 📚 1. Chọn Buổi Học / Đề Kiểm Tra:")
-    
-    col_sel_quiz, col_variant_btn = st.columns([3, 1])
-    with col_sel_quiz:
-        quiz_options = [f"Đề Giảng viên vừa tạo: {st.session_state.current_quiz.get('title')}"] + [f"Đề mẫu: {l['title']}" for l in SAMPLE_LECTURES]
-        selected_quiz_name = st.selectbox("Chọn bài kiểm tra cần làm:", options=quiz_options)
-    
-    if "selected_quiz_name" not in st.session_state or st.session_state.selected_quiz_name != selected_quiz_name:
-        st.session_state.selected_quiz_name = selected_quiz_name
-        st.session_state.student_quiz_seed = None
+    st.caption("Đề được AI Provider tạo từ tài liệu trong Data_Import và giữ nguyên trong phiên làm bài.")
 
-    if "Đề Giảng viên vừa tạo" in selected_quiz_name:
-        raw_quiz = st.session_state.current_quiz
-    else:
-        selected_title = selected_quiz_name.replace("Đề mẫu: ", "")
-        selected_lec = next(l for l in SAMPLE_LECTURES if l["title"] == selected_title)
-        raw_quiz = generate_quiz_from_content(
-            content=selected_lec["summary"] + "\n" + "\n".join(selected_lec["key_points"]),
-            lecture_title=selected_lec["title"],
-            num_questions=4,
-            difficulty="Trung bình"
-        )
+    col_source, col_regenerate = st.columns([3, 1])
+    with col_source:
+        st.markdown("#### 📚 Đề kiểm tra từ AI Provider")
+        st.caption("Lần đầu mở trang, hệ thống tạo một đề 20 câu. Không tạo lại khi trang tự chạy lại.")
 
-    # Automatically generate a student-specific randomized variant (Shuffled questions & options)
-    if st.session_state.student_quiz_seed is None or "active_student_quiz" not in st.session_state:
-        st.session_state.active_student_quiz = create_student_shuffled_quiz(raw_quiz)
-        st.session_state.student_quiz_seed = True
+        # Day selector: choose which Data_Import subfolder to use as source materials
+        data_import_root = os.path.join(PROJECT_ROOT, "Data_Import")
+        day_options = []
+        try:
+            if os.path.isdir(data_import_root):
+                day_options = [d for d in sorted(os.listdir(data_import_root)) if os.path.isdir(os.path.join(data_import_root, d))]
+        except Exception:
+            day_options = []
+
+        if not day_options:
+            day_options = ["."]
+
+        selected_day = st.selectbox("📅 Chọn ngày nguồn dữ liệu (Data_Import/<Ngày>):", options=day_options, index=0)
+        # Keep selection in session so regenerations use same day
+        st.session_state.selected_data_day = selected_day
+
+    if st.session_state.active_student_quiz is None:
+        with st.spinner("🤖 AI đang tạo đề từ tài liệu bài học..."):
+            try:
+                sel_day = st.session_state.get("selected_data_day")
+                if sel_day and sel_day != ".":
+                    data_dir_path = os.path.join(PROJECT_ROOT, "Data_Import", sel_day)
+                else:
+                    data_dir_path = os.path.join(PROJECT_ROOT, "Data_Import")
+
+                # prepare debug placeholder and storage
+                if "provider_debug" not in st.session_state:
+                    st.session_state.provider_debug = []
+                debug_placeholder = st.empty()
+
+                def _progress(msg: str) -> None:
+                    st.session_state.provider_debug.append(msg)
+                    try:
+                        debug_placeholder.text("\n".join(st.session_state.provider_debug))
+                    except Exception:
+                        pass
+
+                # show initial debug area before blocking call
+                debug_placeholder.text("Preparing to generate quiz...\n")
+                st.session_state.active_student_quiz = api.generate_student_quiz(data_dir=data_dir_path, progress_callback=_progress)
+                st.session_state.student_quiz_version += 1
+            except RuntimeError as exc:
+                st.error(f"Không thể tạo đề AI: {exc}")
+                st.stop()
+
+    with col_regenerate:
+        st.markdown("<br>", unsafe_allow_html=True)
+        if st.button("🎲 Tạo Đề Mới", use_container_width=True):
+            with st.spinner("🤖 AI đang tạo đề mới..."):
+                try:
+                    sel_day = st.session_state.get("selected_data_day")
+                    if sel_day and sel_day != ".":
+                        data_dir_path = os.path.join(PROJECT_ROOT, "Data_Import", sel_day)
+                    else:
+                        data_dir_path = os.path.join(PROJECT_ROOT, "Data_Import")
+
+                    if "provider_debug" not in st.session_state:
+                        st.session_state.provider_debug = []
+                    debug_placeholder = st.empty()
+
+                    def _progress(msg: str) -> None:
+                        st.session_state.provider_debug.append(msg)
+                        try:
+                            debug_placeholder.text("\n".join(st.session_state.provider_debug))
+                        except Exception:
+                            pass
+
+                    st.session_state.active_student_quiz = api.generate_student_quiz(data_dir=data_dir_path, progress_callback=_progress)
+                    st.session_state.student_results = None
+                    st.session_state.student_quiz_version += 1
+                except RuntimeError as exc:
+                    st.error(f"Không thể tạo đề AI: {exc}")
+                else:
+                    st.toast("🎲 AI đã tạo một đề hoàn toàn mới!", icon="🎲")
+                    st.rerun()
 
     active_quiz = st.session_state.active_student_quiz
-
-    with col_variant_btn:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🎲 Sinh Mã Đề Mới (New Variant)", use_container_width=True):
-            st.session_state.active_student_quiz = create_student_shuffled_quiz(raw_quiz)
-            st.toast("🎲 Đã phát mã đề thi ngẫu nhiên mới cho Sinh viên!", icon="🎲")
-            st.rerun()
 
     if not active_quiz:
         st.warning("Chưa có bài test nào được chọn!")
@@ -536,13 +631,13 @@ elif mode == "🎓 Sinh viên: Làm Bài Kiểm Tra":
                         options=list(range(len(opts))),
                         index=None,
                         format_func=lambda x: f"{chr(65+x)}. {opts[x]}",
-                        key=f"student_radio_q_{q.get('id')}_{idx}"
+                        key=f"student_radio_q_{q.get('id')}_{idx}_v{st.session_state.student_quiz_version}"
                     )
                     user_answers[q.get("id")] = choice
                 else:
                     text_ans = st.text_input(
                         f"Trả lời ngắn cho câu {idx}:",
-                        key=f"student_text_q_{q.get('id')}_{idx}",
+                        key=f"student_text_q_{q.get('id')}_{idx}_v{st.session_state.student_quiz_version}",
                         placeholder="Nhập câu trả lời của bạn tại đây..."
                     )
                     user_answers[q.get("id")] = text_ans.strip() if text_ans else None

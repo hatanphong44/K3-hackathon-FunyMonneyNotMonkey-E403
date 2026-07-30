@@ -226,7 +226,7 @@ Use the following schema:
 
 {
   "title": "Quiz",
-  "total_questions": 20,
+  "total_questions": 10,
   "estimated_minutes": 20,
   "questions": [
     {
