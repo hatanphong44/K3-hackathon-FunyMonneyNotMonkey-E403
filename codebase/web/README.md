@@ -29,7 +29,7 @@ pip install -r web/requirements.txt
 ### 2. Khởi chạy FastAPI Backend Server
 Mở một cửa sổ terminal và chạy lệnh:
 ```bash
-python web/api_server.py
+python codebase/web/api_server.py
 ```
 *Server sẽ lắng nghe tại: `http://127.0.0.1:8000`. Bạn có thể truy cập API Docs Swagger tại `http://127.0.0.1:8000/docs`.*
 
